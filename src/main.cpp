@@ -24,6 +24,7 @@ signed long tz_offset = 0L;
 
 #define NUM_LEDS 18
 #define PIXEL_PIN 13
+#define PIXEL_BRIGHTNESS 16
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_LEDS, PIXEL_PIN);
 
@@ -55,7 +56,8 @@ time_t getApiTime()
       DeserializationError e = deserializeJson(apiResp, resp);
       if (!e)
       {
-        toReturn = apiResp["unixtime"].as<time_t>();
+        tz_offset = apiResp["raw_offset"].as<signed long>();  // eg for new york, might be -18000 = -5h
+        toReturn = apiResp["unixtime"].as<time_t>() + tz_offset;
         nextUpdateTime = toReturn - 1;
         Serial.printf("Setting unix time to %i\n", (int)toReturn);
       }
@@ -80,6 +82,7 @@ uint32_t convertToHSV(uint8_t counter, uint8_t counterMax)
 void setup()
 {
   pinMode(PIXEL_PIN, OUTPUT);
+  pixels.setBrightness(PIXEL_BRIGHTNESS);
   pixels.begin();
 
   Serial.begin(115200);
