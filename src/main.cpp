@@ -31,7 +31,6 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_LEDS, PIXEL_PIN);
 uint8_t secondMax = 59;
 uint8_t minuteMax = 59;
 uint8_t hourMax = 23;
-byte processChange = 0;
 time_t nextUpdateTime = 0;
 
 uint16_t hueMin = 0;
