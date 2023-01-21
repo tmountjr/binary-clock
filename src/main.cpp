@@ -74,7 +74,7 @@ time_t getApiTime()
  */
 uint32_t convertToHSV(uint8_t counter, uint8_t counterMax)
 {
-  uint16_t hue = map(map(counter, 0, counterMax, hueMin, hueMax), 0, 360, 0, 65535);
+  uint16_t hue = map(map(counter, 0, counterMax, hueMin, hueMax), 360, 0, 0, 65535);
   return pixels.gamma32(pixels.ColorHSV(hue, 255, 255));
 }
 
