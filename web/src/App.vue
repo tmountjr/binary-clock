@@ -6,6 +6,11 @@
         <v-list-item prepend-icon="mdi-palette" @click="cycleColors">
           Cycle Colors
         </v-list-item>
+
+        <v-list-subheader inset>Help</v-list-subheader>
+        <v-list-item prepend-icon="mdi-help-circle-outline">
+          How to Read
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar>

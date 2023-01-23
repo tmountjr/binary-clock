@@ -20,6 +20,8 @@
 HTTPClient http;
 WiFiClient client;
 
+#include "WebServer.h"
+
 signed long tz_offset = 0L;
 
 #define NUM_LEDS 18
@@ -97,6 +99,9 @@ void setup()
   Serial.printf(" complete. IP Address: %s\n", WiFi.localIP().toString().c_str());
 
   setSyncProvider(&getApiTime); // Sync is every 5m by default.
+
+  LittleFS.begin();
+  wifiServerSetup();
 }
 
 void loop()
@@ -128,4 +133,5 @@ void loop()
 
     pixels.show();
   }
+  server.handleClient();
 }

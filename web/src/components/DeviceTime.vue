@@ -24,7 +24,8 @@
 </template>
 
 <script>
-const API_URL = "http://worldtimeapi.org/api/timezone/America/New_York";
+// const API_URL = "http://worldtimeapi.org/api/timezone/America/New_York";
+const API_URL = "/status";
 
 export default {
   data: () => ({
