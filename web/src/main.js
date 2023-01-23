@@ -1,12 +1,28 @@
 import { createApp } from "vue";
-import { createPinia } from "pinia";
 import App from "./App.vue";
 
 // Vuetify
-import "vuetify/styles";
 import { createVuetify } from "vuetify";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
+import {
+  VApp,
+  VNavigationDrawer,
+  VList,
+  VListSubheader,
+  VListItem,
+  VAppBar,
+  VAppBarNavIcon,
+  VToolbarTitle,
+  VBtn,
+  VMain,
+  VContainer,
+  VRow,
+  VCol,
+  VCard,
+  VCardItem,
+  VCardTitle,
+  VCardActions,
+  VSlider,
+} from "vuetify/components";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 const vuetify = createVuetify({
   icons: {
@@ -14,14 +30,31 @@ const vuetify = createVuetify({
     aliases,
     sets: { mdi },
   },
-  components,
-  directives,
+  components: {
+    VApp,
+    VNavigationDrawer,
+    VList,
+    VListSubheader,
+    VListItem,
+    VAppBar,
+    VAppBarNavIcon,
+    VToolbarTitle,
+    VBtn,
+    VMain,
+    VContainer,
+    VRow,
+    VCol,
+    VCard,
+    VCardItem,
+    VCardTitle,
+    VCardActions,
+    VSlider,
+  },
 });
 
 import "./assets/main.css";
 
 const app = createApp(App);
 
-app.use(createPinia());
 app.use(vuetify);
 app.mount("#app");
