@@ -24,8 +24,8 @@
 </template>
 
 <script>
-// const API_URL = "http://worldtimeapi.org/api/timezone/America/New_York";
-const API_URL = "/status";
+const GET_TIME_URL = "/unixtime";
+const REFRESH_TIME_URL = `${GET_TIME_URL}/refresh`;
 
 export default {
   data: () => ({
@@ -34,24 +34,32 @@ export default {
   }),
   methods: {
     async reloadDeviceTime() {
-      // For now we'll use an external API. Eventually we'll run a webserver on the
-      // ESP.
-      console.debug("TODO: implement device time route");
       this.loading = true;
       try {
-        const resp = await fetch(API_URL);
+        const resp = await fetch(GET_TIME_URL);
         const data = await resp.json();
-        const { unixtime } = data;
-        const time = new Date(unixtime * 1000);
-        this.deviceTime = time.toLocaleString();
+        this.setTime(data);
       } catch (e) {
         console.error(e);
       } finally {
         this.loading = false;
       }
     },
-    ntpUpdate() {
-      console.debug("TODO: implement NTP update route");
+    async ntpUpdate() {
+      this.loading = true;
+      try {
+        const resp = await fetch(REFRESH_TIME_URL, { method: "POST" });
+        const data = await resp.json();
+        this.setTime(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loading = false;
+      }
+    },
+    setTime({ unixtime, tz_offset }) {
+      const time = new Date((unixtime - tz_offset) * 1000);
+      this.deviceTime = time.toLocaleString();
     },
   },
   computed: {

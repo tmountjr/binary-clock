@@ -20,9 +20,8 @@
 HTTPClient http;
 WiFiClient client;
 
+#include "TimeHelpers.h"
 #include "WebServer.h"
-
-signed long tz_offset = 0L;
 
 #define NUM_LEDS 18
 #define PIXEL_PIN 13
@@ -33,40 +32,11 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_LEDS, PIXEL_PIN);
 uint8_t secondMax = 59;
 uint8_t minuteMax = 59;
 uint8_t hourMax = 23;
-time_t nextUpdateTime = 0;
 
 uint16_t hueMin = 0;
 uint16_t hueMax = 360;
 
 uint8_t digitCount = 6; // The maximum number of binary bits we care about.
-
-/**
- * Custom time provider.
- * @returns A unix timestamp.
-*/
-time_t getApiTime()
-{
-  time_t toReturn = 0;
-  if (http.begin(client, "http://worldtimeapi.org/api/timezone/America/New_York"))
-  {
-    int httpCode = http.GET();
-    if (httpCode == 200)
-    {
-      DynamicJsonDocument apiResp(2048);
-      String resp = http.getString();
-      DeserializationError e = deserializeJson(apiResp, resp);
-      if (!e)
-      {
-        tz_offset = apiResp["raw_offset"].as<signed long>();  // eg for new york, might be -18000 = -5h
-        toReturn = apiResp["unixtime"].as<time_t>() + tz_offset;
-        nextUpdateTime = toReturn - 1;
-        Serial.printf("Setting unix time to %i\n", (int)toReturn);
-      }
-    }
-    http.end();
-  }
-  return toReturn;
-}
 
 /**
  * Convert a counter to a hue value.

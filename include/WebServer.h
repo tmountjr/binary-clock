@@ -7,7 +7,7 @@
 
 ESP8266WebServer server(8080);
 
-#define STATUS_RESPONSE_OBJECTS 1
+#define STATUS_RESPONSE_OBJECTS 2
 
 void corsResponse()
 {
@@ -44,7 +44,30 @@ void getHomeResponse()
   }
 }
 
-void getStatusResponse()
+void setUnixtimeRefreshResponse()
+{
+  HTTPMethod method = server.method();
+  if (method == HTTP_OPTIONS)
+    corsResponse();
+  else if (method == HTTP_POST) {
+    setSyncProvider(&getApiTime);
+    time_t toReturn = getApiTime();
+    DynamicJsonDocument jsonObject(JSON_OBJECT_SIZE(STATUS_RESPONSE_OBJECTS));
+    jsonObject["unixtime"] = toReturn;
+    jsonObject["tz_offset"] = tz_offset;
+
+    String jsonObjectString;
+    serializeJson(jsonObject, jsonObjectString);
+
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "application/json", jsonObjectString);
+  } else {
+    invalidRequestResponse(405, "Method Not Allowed");
+  }
+
+}
+
+void getUnixtimeResponse()
 {
   HTTPMethod method = server.method();
   if (method == HTTP_HEAD)
@@ -55,6 +78,7 @@ void getStatusResponse()
   {
     DynamicJsonDocument jsonObject(JSON_OBJECT_SIZE(STATUS_RESPONSE_OBJECTS));
     jsonObject["unixtime"] = now();
+    jsonObject["tz_offset"] = tz_offset;
 
     String jsonObjectString;
     serializeJson(jsonObject, jsonObjectString);
@@ -94,10 +118,13 @@ void getStaticAsset()
 void wifiServerSetup()
 {
   server.enableCORS(true);
-  server.on("/status", getStatusResponse);
+
+  server.on("/unixtime/refresh", setUnixtimeRefreshResponse);
+  server.on("/unixtime", getUnixtimeResponse);
   server.on(UriRegex("/assets/(.*)"), getStaticAsset);
   server.on("/", getHomeResponse);
 
+  // Serve any other file requested from flash.
   server.serveStatic("/", LittleFS, "/");
 
   server.onNotFound(notFoundResponse);
