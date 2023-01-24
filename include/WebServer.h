@@ -64,7 +64,53 @@ void setUnixtimeRefreshResponse()
   } else {
     invalidRequestResponse(405, "Method Not Allowed");
   }
+}
 
+void setBrightnessResponse() {
+  HTTPMethod method = server.method();
+  if (method == HTTP_OPTIONS)
+    corsResponse();
+  else if (method == HTTP_POST)
+  {
+    DynamicJsonDocument inputDoc(48);
+    DeserializationError err = deserializeJson(inputDoc, server.arg("plain"));
+    if (err) {
+      Serial.print(F("deserializeJson() failed with code "));
+      Serial.println(err.f_str());
+    } else {
+      uint8_t newBrightness = inputDoc["brightness"];
+      currentBrightness = map(newBrightness, 1, 100, 0, 255);
+      pixels.setBrightness(currentBrightness);
+
+      String outputString;
+      serializeJson(inputDoc, outputString);
+
+      server.sendHeader("Access-Control-Allow-Origin", "*");
+      server.send(200, "application/json", outputString);
+    }
+  }
+  else
+    invalidRequestResponse(405, "Method Not Allowed");
+}
+
+void getBrightnessResponse() {
+  // range is 0 (off) to 255 (full)
+  HTTPMethod method = server.method();
+  if (method == HTTP_OPTIONS)
+    corsResponse();
+  else if (method == HTTP_GET)
+  {
+    DynamicJsonDocument jsonObject(JSON_OBJECT_SIZE(STATUS_RESPONSE_OBJECTS));
+    jsonObject["brightness"] = map(currentBrightness, 0, 255, 0, 100);
+
+    String jsonObjectString;
+    serializeJson(jsonObject, jsonObjectString);
+
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "application/json", jsonObjectString);
+  }
+  else
+    invalidRequestResponse(405, "Method Not Allowed");
 }
 
 void getUnixtimeResponse()
@@ -121,6 +167,8 @@ void wifiServerSetup()
 
   server.on("/unixtime/refresh", setUnixtimeRefreshResponse);
   server.on("/unixtime", getUnixtimeResponse);
+  server.on("/brightness/set", setBrightnessResponse);
+  server.on("/brightness", getBrightnessResponse);
   server.on(UriRegex("/assets/(.*)"), getStaticAsset);
   server.on("/", getHomeResponse);
 

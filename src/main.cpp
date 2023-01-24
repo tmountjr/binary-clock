@@ -17,17 +17,17 @@
 #define WIFI_SSID "Please define WIFI_SSID in include/secrets.h"
 #endif
 
+#define NUM_LEDS 18
+#define PIXEL_PIN 13
+#define INITIAL_PIXEL_BRIGHTNESS 16
+uint8_t currentBrightness = INITIAL_PIXEL_BRIGHTNESS;
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_LEDS, PIXEL_PIN);
+
 HTTPClient http;
 WiFiClient client;
 
 #include "TimeHelpers.h"
 #include "WebServer.h"
-
-#define NUM_LEDS 18
-#define PIXEL_PIN 13
-#define PIXEL_BRIGHTNESS 16
-
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_LEDS, PIXEL_PIN);
 
 uint8_t secondMax = 59;
 uint8_t minuteMax = 59;
@@ -53,7 +53,7 @@ uint32_t convertToHSV(uint8_t counter, uint8_t counterMax)
 void setup()
 {
   pinMode(PIXEL_PIN, OUTPUT);
-  pixels.setBrightness(PIXEL_BRIGHTNESS);
+  pixels.setBrightness(currentBrightness);
   pixels.begin();
 
   Serial.begin(115200);

@@ -29,31 +29,51 @@
 </template>
 
 <script>
+const GET_BRIGHTNESS_URL = "/brightness";
+const SET_BRIGHTNESS_URL = `${GET_BRIGHTNESS_URL}/set`;
+
 export default {
   data: () => ({
     brightness: 0,
     initialBrightness: 0,
   }),
-  mounted() {
-    this.getDeviceBrightness();
+  async mounted() {
+    await this.getDeviceBrightness();
+    this.brightness = this.initialBrightness;
   },
   methods: {
-    getDeviceBrightness() {
-      console.debug("TODO: implement brightness fetch");
-      this.initialBrightness = 25;
-      this.brightness = 25;
+    async getDeviceBrightness() {
+      try {
+        const resp = await fetch(GET_BRIGHTNESS_URL);
+        const data = await resp.json();
+        this.initialBrightness = data.brightness;
+      } catch (e) {
+        console.error(e);
+      }
     },
     brightnessOff() {
-      this.brightness = 0;
+      this.brightness = 1;
     },
     brightnessFull() {
       this.brightness = 100;
     },
-    saveBrightness() {
-      console.debug("TODO: implement brightness route and functionality");
-      // For now, replicate the functionality by setting the values.
-      // Eventually we'll post and get the response back.
-      this.initialBrightness = this.brightness;
+    async saveBrightness() {
+      try {
+        const resp = await fetch(SET_BRIGHTNESS_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            brightness: this.brightness,
+          }),
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await resp.json();
+        this.initialBrightness = data.brightness;
+      } catch (e) {
+        console.error(e);
+      }
     },
   },
 };

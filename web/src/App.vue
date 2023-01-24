@@ -23,8 +23,8 @@
       <v-container fluid>
         <v-row dense>
           <DeviceTime />
-          <InvertDisplay />
           <BrightnessControl />
+          <InvertDisplay />
         </v-row>
       </v-container>
     </v-main>
