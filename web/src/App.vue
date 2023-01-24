@@ -1,16 +1,29 @@
 <template>
   <v-app :theme="theme">
     <v-navigation-drawer v-model="drawer">
-      <v-list>
+      <v-list v-model:opened="open">
         <v-list-subheader inset>Diagnostics</v-list-subheader>
         <v-list-item prepend-icon="mdi-palette" @click="cycleColors">
           Cycle Colors
         </v-list-item>
 
         <v-list-subheader inset>Help</v-list-subheader>
-        <v-list-item prepend-icon="mdi-help-circle-outline">
-          How to Read
-        </v-list-item>
+        <v-list-group value="How to Read">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-help-circle-outline"
+              title="How to Read"
+            />
+          </template>
+
+          <v-list-item>
+            <ColorGuide />
+          </v-list-item>
+          <v-list-item>
+            <BinaryGuide />
+          </v-list-item>
+        </v-list-group>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar>
@@ -35,15 +48,14 @@
 import BrightnessControl from "./components/BrightnessControl.vue";
 import DeviceTime from "./components/DeviceTime.vue";
 import InvertDisplay from "./components/InvertDisplay.vue";
+import ColorGuide from "./components/ColorGuide.vue";
+import BinaryGuide from "./components/BinaryGuide.vue";
 
 export default {
   data: () => ({
     theme: "light",
     drawer: false,
-    drawerItems: [
-      { type: "subheader", title: "Diagnostics" },
-      { title: "Cycle Colors" },
-    ],
+    open: ["How to Read"],
   }),
   methods: {
     onClick() {
@@ -58,6 +70,12 @@ export default {
       return this.theme === "light" ? "mdi-weather-sunny" : "mdi-weather-night";
     },
   },
-  components: { DeviceTime, InvertDisplay, BrightnessControl },
+  components: {
+    DeviceTime,
+    InvertDisplay,
+    BrightnessControl,
+    ColorGuide,
+    BinaryGuide,
+  },
 };
 </script>
