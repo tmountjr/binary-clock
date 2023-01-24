@@ -9,9 +9,11 @@
           This option will invert the display (in case you want to place the
           clock upside down).
         </p>
+        <p><em>This option is not yet available.</em></p>
       </v-card-text>
       <v-card-actions>
         <v-btn
+          disabled
           prepend-icon="mdi-flip-vertical"
           :loading="loading"
           @click="invertDisplay"
