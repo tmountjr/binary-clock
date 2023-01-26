@@ -46,8 +46,10 @@ export default {
       }
     },
   },
-  calculated: {
-    inversionStatus: this.binaryStatus ? "Inverted" : "Normal",
+  computed: {
+    inversionStatus() {
+      return this.binaryStatus ? "Inverted" : "Normal";
+    },
   },
 };
 </script>
