@@ -136,6 +136,29 @@ void getUnixtimeResponse()
     invalidRequestResponse(405, "Method Not Allowed");
 }
 
+void setInvertDisplayResponse()
+{
+  HTTPMethod method = server.method();
+  if (method == HTTP_OPTIONS)
+    corsResponse();
+  else if (method == HTTP_POST)
+  {
+    inverted = !inverted;
+    DynamicJsonDocument jsonObject(JSON_OBJECT_SIZE(STATUS_RESPONSE_OBJECTS));
+    jsonObject["invertStatus"] = inverted;
+
+    String jsonObjectString;
+    serializeJson(jsonObject, jsonObjectString);
+
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "application/json", jsonObjectString);
+  }
+  else
+  {
+    invalidRequestResponse(405, "Method Not Allowed");
+  }
+}
+
 void getStaticAsset()
 {
   String filename = server.pathArg(0);
@@ -169,6 +192,7 @@ void wifiServerSetup()
   server.on("/unixtime", getUnixtimeResponse);
   server.on("/brightness/set", setBrightnessResponse);
   server.on("/brightness", getBrightnessResponse);
+  server.on("/display/invert", setInvertDisplayResponse);
   server.on(UriRegex("/assets/(.*)"), getStaticAsset);
   server.on("/", getHomeResponse);
 
