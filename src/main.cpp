@@ -95,9 +95,9 @@ void loop()
       pixelList[1] = bit + digitCount;        // Minutes
       pixelList[2] = bit + (digitCount * 2);  // Hours
       if (inverted) {
-        pixelList[0] = (digitCount * 3) + (1 - bit);
-        pixelList[1] = (digitCount * 2) + (1 - bit);
-        pixelList[2] = digitCount + (1 - bit);
+        pixelList[0] = (digitCount * 3) + (1 - bit) - 2;
+        pixelList[1] = (digitCount * 2) + (1 - bit) - 2;
+        pixelList[2] = digitCount + (1 - bit) - 2;
       }
 
       if (secondCounter & mask)
