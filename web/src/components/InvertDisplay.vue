@@ -9,11 +9,10 @@
           This option will invert the display (in case you want to place the
           clock upside down).
         </p>
-        <p><em>This option is not yet available.</em></p>
+        <p>Current device setting: {{ inversionStatus }}</p>
       </v-card-text>
       <v-card-actions>
         <v-btn
-          disabled
           prepend-icon="mdi-flip-vertical"
           :loading="loading"
           @click="invertDisplay"
@@ -26,14 +25,29 @@
 </template>
 
 <script>
+const SET_INVERT_URL = "/display/invert";
+
 export default {
   data: () => ({
     loading: false,
+    binaryStatus: false,
   }),
   methods: {
     async invertDisplay() {
-      console.debug("TODO: implement inversion route and functionality");
+      try {
+        const resp = await fetch(SET_INVERT_URL, {
+          method: "POST",
+          Accept: "application/json",
+        });
+        const data = await resp.json();
+        this.binaryStatus = data.invertStatus;
+      } catch (e) {
+        console.error(e);
+      }
     },
+  },
+  calculated: {
+    inversionStatus: this.binaryStatus ? "Inverted" : "Normal",
   },
 };
 </script>
