@@ -20,6 +20,7 @@
 #define NUM_LEDS 18
 #define PIXEL_PIN 13
 #define INITIAL_PIXEL_BRIGHTNESS 16
+uint8_t inverted = 0;
 uint8_t currentBrightness = INITIAL_PIXEL_BRIGHTNESS;
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_LEDS, PIXEL_PIN);
 
@@ -89,14 +90,24 @@ void loop()
 
     for (uint8_t bit = 0; bit < digitCount; bit++)
     {
+      uint8_t pixelList[3];
+      pixelList[0] = bit;                     // Seconds
+      pixelList[1] = bit + digitCount;        // Minutes
+      pixelList[2] = bit + (digitCount * 2);  // Hours
+      if (inverted) {
+        pixelList[0] = (digitCount * 3) + (1 - bit);
+        pixelList[1] = (digitCount * 2) + (1 - bit);
+        pixelList[2] = digitCount + (1 - bit);
+      }
+
       if (secondCounter & mask)
-        pixels.setPixelColor(bit, convertToHSV(secondCounter, secondMax));
+        pixels.setPixelColor(pixelList[0], convertToHSV(secondCounter, secondMax));
 
       if (minuteCounter & mask)
-        pixels.setPixelColor(bit + digitCount, convertToHSV(minuteCounter, minuteMax));
+        pixels.setPixelColor(pixelList[1], convertToHSV(minuteCounter, minuteMax));
 
       if (hourCounter & mask)
-        pixels.setPixelColor(bit + (digitCount * 2), convertToHSV(hourCounter, hourMax));
+        pixels.setPixelColor(pixelList[2], convertToHSV(hourCounter, hourMax));
 
       mask = mask << 1;
     }
