@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="12">
+  <v-col cols="12" md="4">
     <v-card>
       <v-card-item>
         <v-card-title>Invert Display</v-card-title>

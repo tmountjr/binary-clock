@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="12">
+  <v-col cols="12" md="4">
     <v-card>
       <v-card-item>
         <v-card-title>Device Time</v-card-title>
@@ -16,7 +16,7 @@
           Refresh
         </v-btn>
         <v-btn prepend-icon="mdi-history" @click="ntpUpdate">
-          Force NTP Reload
+          NTP Reload
         </v-btn>
       </v-card-actions>
     </v-card>
