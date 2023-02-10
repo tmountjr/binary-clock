@@ -7,7 +7,13 @@ import viteCompression from "vite-plugin-compression";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vuetify({ autoImport: true }), viteCompression()],
+  plugins: [
+    vue(),
+    vuetify({ autoImport: true, styles: "none" }),
+    viteCompression({
+      // algorithm: "brotliCompress",
+    }),
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -16,5 +22,6 @@ export default defineConfig({
   build: {
     outDir: "../data",
     emptyOutDir: true,
+    sourcemap: false,
   },
 });

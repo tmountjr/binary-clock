@@ -9,12 +9,6 @@ ESP8266WebServer server(8080);
 
 #define STATUS_RESPONSE_OBJECTS 2
 
-void corsResponse()
-{
-  server.sendHeader("Access-Control-Allow-Origin", "*");
-  server.send(204, "text/plain", "");
-}
-
 void invalidRequestResponse(int status = 400, String msg = "Bad Request")
 {
   server.send(status, "text/plain", msg);
@@ -47,9 +41,7 @@ void getHomeResponse()
 void setUnixtimeRefreshResponse()
 {
   HTTPMethod method = server.method();
-  if (method == HTTP_OPTIONS)
-    corsResponse();
-  else if (method == HTTP_POST) {
+  if (method == HTTP_POST) {
     setSyncProvider(&getApiTime);
     time_t toReturn = getApiTime();
     DynamicJsonDocument jsonObject(JSON_OBJECT_SIZE(STATUS_RESPONSE_OBJECTS));
@@ -59,7 +51,6 @@ void setUnixtimeRefreshResponse()
     String jsonObjectString;
     serializeJson(jsonObject, jsonObjectString);
 
-    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "application/json", jsonObjectString);
   } else {
     invalidRequestResponse(405, "Method Not Allowed");
@@ -68,9 +59,7 @@ void setUnixtimeRefreshResponse()
 
 void setBrightnessResponse() {
   HTTPMethod method = server.method();
-  if (method == HTTP_OPTIONS)
-    corsResponse();
-  else if (method == HTTP_POST)
+  if (method == HTTP_POST)
   {
     DynamicJsonDocument inputDoc(48);
     DeserializationError err = deserializeJson(inputDoc, server.arg("plain"));
@@ -85,7 +74,6 @@ void setBrightnessResponse() {
       String outputString;
       serializeJson(inputDoc, outputString);
 
-      server.sendHeader("Access-Control-Allow-Origin", "*");
       server.send(200, "application/json", outputString);
     }
   }
@@ -96,9 +84,7 @@ void setBrightnessResponse() {
 void getBrightnessResponse() {
   // range is 0 (off) to 255 (full)
   HTTPMethod method = server.method();
-  if (method == HTTP_OPTIONS)
-    corsResponse();
-  else if (method == HTTP_GET)
+  if (method == HTTP_GET)
   {
     DynamicJsonDocument jsonObject(JSON_OBJECT_SIZE(STATUS_RESPONSE_OBJECTS));
     jsonObject["brightness"] = map(currentBrightness, 0, 255, 0, 100);
@@ -106,7 +92,6 @@ void getBrightnessResponse() {
     String jsonObjectString;
     serializeJson(jsonObject, jsonObjectString);
 
-    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "application/json", jsonObjectString);
   }
   else
@@ -116,11 +101,7 @@ void getBrightnessResponse() {
 void getUnixtimeResponse()
 {
   HTTPMethod method = server.method();
-  if (method == HTTP_HEAD)
-    server.send(200, "application/json", "");
-  else if (method == HTTP_OPTIONS)
-    corsResponse();
-  else if (method == HTTP_GET)
+  if (method == HTTP_GET)
   {
     DynamicJsonDocument jsonObject(JSON_OBJECT_SIZE(STATUS_RESPONSE_OBJECTS));
     jsonObject["unixtime"] = now();
@@ -129,7 +110,6 @@ void getUnixtimeResponse()
     String jsonObjectString;
     serializeJson(jsonObject, jsonObjectString);
 
-    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "application/json", jsonObjectString);
   }
   else
@@ -139,9 +119,7 @@ void getUnixtimeResponse()
 void setInvertDisplayResponse()
 {
   HTTPMethod method = server.method();
-  if (method == HTTP_OPTIONS)
-    corsResponse();
-  else if (method == HTTP_POST)
+  if (method == HTTP_POST)
   {
     inverted = !inverted;
     DynamicJsonDocument jsonObject(JSON_OBJECT_SIZE(STATUS_RESPONSE_OBJECTS));
@@ -150,7 +128,6 @@ void setInvertDisplayResponse()
     String jsonObjectString;
     serializeJson(jsonObject, jsonObjectString);
 
-    server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "application/json", jsonObjectString);
   }
   else
@@ -162,6 +139,7 @@ void setInvertDisplayResponse()
 void getStaticAsset()
 {
   String filename = server.pathArg(0);
+  
   String ext = filename.substring(filename.lastIndexOf("."));
   String contentType;
   if (ext == ".js")
@@ -171,16 +149,20 @@ void getStaticAsset()
   else
     contentType = "text/plain";
 
-  String path = "/assets/" + filename + ".gz";
-  if (LittleFS.exists(path))
-  {
-    File index = LittleFS.open(path, "r");
-    server.sendHeader("Cache-Control", "max-age: 31556952");
-    server.streamFile(index, contentType);
-  }
+  String compressedPath = "/assets/" + filename + ".gz";
+  String uncompressedPath = "/assets/" + filename;
+
+  bool compressedExists = LittleFS.exists(compressedPath);
+  bool uncompressedExists = LittleFS.exists(uncompressedPath);
+
+  if (!(uncompressedExists || compressedExists))
+    invalidRequestResponse(404, "Not Found");
   else
   {
-    invalidRequestResponse(404, "Not Found");
+    String servePath = compressedExists ? compressedPath : uncompressedPath;
+    File index = LittleFS.open(servePath, "r");
+    server.sendHeader("Cache-Control", "max-age: 31556952");
+    server.streamFile(index, contentType);
   }
 }
 
