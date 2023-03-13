@@ -19,7 +19,13 @@ time_t getApiTime()
       if (!e)
       {
         tz_offset = apiResp["raw_offset"].as<signed long>(); // eg for new york, might be -18000 = -5h
-        toReturn = apiResp["unixtime"].as<time_t>() + tz_offset;
+        time_t unixtime = apiResp["unixtime"].as<time_t>();
+        bool is_dst = apiResp["dst"].as<bool>();
+        if (is_dst) {
+          signed int dst_offset = apiResp["dst_offset"].as<signed int>();
+          tz_offset = tz_offset + dst_offset;
+        }
+        toReturn = unixtime + tz_offset;
         nextUpdateTime = toReturn - 1;
         Serial.printf("Setting unix time to %i\n", (int)toReturn);
       }
