@@ -67,12 +67,25 @@ void setup()
     Serial.print(".");
     delay(1000);
   }
-  Serial.printf(" complete. IP Address: %s\n", WiFi.localIP().toString().c_str());
+  String localIp = WiFi.localIP().toString();
+  Serial.printf(" complete. IP Address: %s\n", localIp.c_str());
 
   setSyncProvider(&getApiTime); // Sync is every 5m by default.
 
   LittleFS.begin();
   wifiServerSetup();
+
+  #ifdef IP_TRACKER
+  char url[128];
+  strcpy(url, IP_TRACKER);
+  strcat(url, localIp.c_str());
+  Serial.printf("\nPinging url %s...\n", url);
+  if (http.begin(client, url))
+  {
+    int httpCode = http.GET();
+    Serial.printf("Pinged IP tracker. Status code = %i\n", httpCode);
+  }
+  #endif
 }
 
 void loop()
