@@ -30,26 +30,10 @@ WiFiClient client;
 #include "TimeHelpers.h"
 #include "WebServer.h"
 
-uint8_t secondMax = 59;
-uint8_t minuteMax = 59;
-uint8_t hourMax = 23;
-
-uint16_t hueMin = 0;
-uint16_t hueMax = 360;
-
 uint8_t digitCount = 6; // The maximum number of binary bits we care about.
 
-/**
- * Convert a counter to a hue value.
- * @param counter The counter value to convert.
- * @param counterMax The max value of that counter.
- * @returns The packed color value for that hue.
- */
-uint32_t convertToHSV(uint8_t counter, uint8_t counterMax)
-{
-  uint16_t hue = map(map(counter, 0, counterMax, hueMin, hueMax), 360, 0, 0, 65535);
-  return pixels.gamma32(pixels.ColorHSV(hue, 255, 255));
-}
+uint32_t hours[24];
+uint32_t seconds_minutes[60];
 
 void setup()
 {
@@ -74,6 +58,37 @@ void setup()
 
   LittleFS.begin();
   wifiServerSetup();
+
+  // Read in the hours and seconds_minutes files for the color maps.
+  File hours_bin = LittleFS.open("/hours.bin", "r");
+  if (!hours_bin) {
+    Serial.println("Cannot open hours.bin; using red for all hours.");
+    // TODO: for debugging purposes, just do a solid fill
+    for (int i = 0; i < 24; i++) {
+      hours[i] = 16711680; // (255, 0, 0)
+    }
+  } else {
+    Serial.println("hours.bin found, using color wheel information.");
+    for (int i = 0; i < 24; i++) {
+      hours_bin.readBytes((char*)&hours[i], sizeof(hours[i]));
+    }
+  }
+  hours_bin.close();
+
+  File ms_bin = LittleFS.open("/seconds_minutes.bin", "r");
+  if (!ms_bin) {
+    Serial.println("Cannot open seconds_minutes.bin; using green for all hours.");
+    // TODO: for debugging purposes, just do a solid fill
+    for (int i = 0; i < 60; i++) {
+      seconds_minutes[i] = 255; // (0, 255, 0)
+    }
+  } else {
+    Serial.println("seconds_minutes.bin found, using color wheel information.");
+    for (int i = 0; i < 60; i++) {
+      ms_bin.readBytes((char*)&seconds_minutes[i], sizeof(seconds_minutes[i]));
+    }
+  }
+  ms_bin.close();
 
   #ifdef IP_TRACKER
   char url[128];
@@ -114,13 +129,13 @@ void loop()
       }
 
       if (secondCounter & mask)
-        pixels.setPixelColor(pixelList[0], convertToHSV(secondCounter, secondMax));
+        pixels.setPixelColor(pixelList[0], seconds_minutes[secondCounter % 60]);
 
       if (minuteCounter & mask)
-        pixels.setPixelColor(pixelList[1], convertToHSV(minuteCounter, minuteMax));
+        pixels.setPixelColor(pixelList[1], seconds_minutes[minuteCounter % 60]);
 
       if (hourCounter & mask)
-        pixels.setPixelColor(pixelList[2], convertToHSV(hourCounter, hourMax));
+        pixels.setPixelColor(pixelList[2], hours[hourCounter % 24]);
 
       mask = mask << 1;
     }
